@@ -5,17 +5,18 @@ on:
     types: [created]
 
 permissions:
-  contents: read
-  deployments: write
-  issues: write
+  id-token: write
   pull-requests: write
+  deployments: write
+  contents: write
+  checks: read
+  statuses: read
 
 jobs:
   branch-deploy:
-    if: github.event.issue.pull_request
     runs-on: ubuntu-latest
-    
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -28,10 +29,9 @@ jobs:
         with:
           trigger: '.deploy'
           environment: 'production'
-          production_environment: 'production'
           environment_targets: 'production,staging,development'
-          admins: ${{ github.repository_owner }}
-          permissions: 'write,maintain,admin'
+          # permissions: 'write,maintain,admin'
+          # environment_url_in_comment: true
 
       - name: Deploy (production)
         if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'production' }}
