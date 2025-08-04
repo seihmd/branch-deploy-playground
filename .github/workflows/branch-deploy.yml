@@ -25,43 +25,43 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Branch Deploy
-        id: branch-deploy
-        uses: github/branch-deploy@v9
-        with:
-          trigger: '.deploy'
-          environment: 'production'
-          production_environment: 'production'
-          environment_targets: 'production,staging,development'
-          # permissions: 'write,maintain,admin'
-          # environment_url_in_comment: true
+      # - name: Branch Deploy
+      #   id: branch-deploy
+      #   uses: github/branch-deploy@v9
+      #   with:
+      #     trigger: '.deploy'
+      #     environment: 'production'
+      #     production_environment: 'production'
+      #     environment_targets: 'production,staging,development'
+      #     # permissions: 'write,maintain,admin'
+      #     # environment_url_in_comment: true
 
-      - name: Deploy (production)
-        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'production' }}
-        run: |
-          echo "Deploying to production..."
-          echo "Branch: ${{ steps.branch-deploy.outputs.ref }}"
-          echo "Environment: ${{ steps.branch-deploy.outputs.environment }}"
-          # Add your production deployment commands here
-          sleep 5
-          echo "Production deployment completed"
+      # - name: Deploy (production)
+      #   if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'production' }}
+      #   run: |
+      #     echo "Deploying to production..."
+      #     echo "Branch: ${{ steps.branch-deploy.outputs.ref }}"
+      #     echo "Environment: ${{ steps.branch-deploy.outputs.environment }}"
+      #     # Add your production deployment commands here
+      #     sleep 5
+      #     echo "Production deployment completed"
 
-      - name: Deploy (staging)
-        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'staging' }}
-        run: |
-          echo "Deploying to staging..."
-          echo "Branch: ${{ steps.branch-deploy.outputs.ref }}"
-          echo "Environment: ${{ steps.branch-deploy.outputs.environment }}"
-          # Add your staging deployment commands here
-          sleep 3
-          echo "Staging deployment completed"
+      # - name: Deploy (staging)
+      #   if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'staging' }}
+      #   run: |
+      #     echo "Deploying to staging..."
+      #     echo "Branch: ${{ steps.branch-deploy.outputs.ref }}"
+      #     echo "Environment: ${{ steps.branch-deploy.outputs.environment }}"
+      #     # Add your staging deployment commands here
+      #     sleep 3
+      #     echo "Staging deployment completed"
 
-      - name: Deploy (development)
-        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'development' }}
-        run: |
-          echo "Deploying to development..."
-          echo "Branch: ${{ steps.branch-deploy.outputs.ref }}"
-          echo "Environment: ${{ steps.branch-deploy.outputs.environment }}"
-          # Add your development deployment commands here
-          sleep 2
-          echo "Development deployment completed"
+      # - name: Deploy (development)
+      #   if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'development' }}
+      #   run: |
+      #     echo "Deploying to development..."
+      #     echo "Branch: ${{ steps.branch-deploy.outputs.ref }}"
+      #     echo "Environment: ${{ steps.branch-deploy.outputs.environment }}"
+      #     # Add your development deployment commands here
+      #     sleep 2
+      #     echo "Development deployment completed"
