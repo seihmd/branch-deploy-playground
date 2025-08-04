@@ -5,6 +5,7 @@ on:
     types: [created]
 
 permissions:
+  id-token: write
   pull-requests: write
   deployments: write
   contents: write
