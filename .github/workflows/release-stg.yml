@@ -26,22 +26,22 @@ jobs:
       - name: Check if branch is up-to-date with main
         run: |
           if ! git merge-base --is-ancestor origin/main HEAD; then
-            echo "🚨 Your branch is not up-to-date with 'main'. Please merge main."
+            echo "Branch is not up-to-date with main. Please merge main."
             exit 1
           fi
-          echo "✅ Branch is up-to-date."
+          echo "Branch is up-to-date."
 
   deploy_stg_web:
     needs: pre-checks
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🚀 Deploying to stg-web..."
+      - run: echo "Deploying to stg-web..."
 
   run_ci:
     needs: deploy_stg_web
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🤖 Running CI checks on STG..."
+      - run: echo "Running CI checks on STG..."
 
   notify_for_approval:
     needs: [gate-check, run_ci]
@@ -56,5 +56,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: ${{ needs.gate-check.outputs.pr_number }},
-              body: '✅ STG deployment for `web` is complete.\n\nTo proceed to production, please add the `deploy-prd-web` label.'
+              body: 'STG deployment for web is complete.\n\nTo proceed to production, please add the deploy-prd-web label.'
             })
