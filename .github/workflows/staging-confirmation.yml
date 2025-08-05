@@ -1,0 +1,80 @@
+name: Staging Confirmation
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  confirm-staging:
+    if: ${{ contains(github.event.comment.body, '.confirm-staging') && github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Get PR details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            return {
+              ref: pr.data.head.ref,
+              sha: pr.data.head.sha
+            };
+
+      - name: Staging confirmation received
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Staging confirmation received from @' + context.actor + '\n\nThe staging deployment has been verified and approved.'
+            });
+
+      - name: Close approval issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Find and close the manual approval issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'manual-approval'
+            });
+            
+            for (const issue of issues.data) {
+              if (issue.title.includes('Manual approval required for staging deployment') && 
+                  issue.body.includes('PR #' + context.issue.number)) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+                
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '✅ Approved by @' + context.actor + ' in PR #' + context.issue.number
+                });
+                break;
+              }
+            }

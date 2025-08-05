@@ -1,0 +1,60 @@
+name: Deploy STG
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  gate-check:
+    if: github.event.label.name == 'deploy-stg'
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ github.event.pull_request.number }}
+      head_ref: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - run: echo "🚀 Starting release to STG for PR #${{ github.event.pull_request.number }}"
+
+  pre-checks:
+    needs: gate-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate-check.outputs.head_ref }}
+          fetch-depth: 0
+      - name: Check if branch is up-to-date with main
+        run: |
+          if ! git merge-base --is-ancestor origin/main HEAD; then
+            echo "🚨 Your branch is not up-to-date with 'main'. Please merge main."
+            exit 1
+          fi
+          echo "✅ Branch is up-to-date."
+
+  deploy_stg_web:
+    needs: pre-checks
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🚀 Deploying to stg-web..."
+
+  run_ci:
+    needs: deploy_stg_web
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🤖 Running CI checks on STG..."
+
+  notify_for_approval:
+    needs: [gate-check, run_ci]
+    if: always() && needs.run_ci.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post comment for approval
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ needs.gate-check.outputs.pr_number }},
+              body: '✅ STG deployment for `web` is complete.\n\nTo proceed to production, please add the `deploy-prd-web` label.'
+            })

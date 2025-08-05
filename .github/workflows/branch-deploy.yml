@@ -52,6 +52,25 @@ jobs:
           # Add your staging deployment commands here
           sleep 3
           echo "Staging deployment completed"
+          echo "🔍 Please verify the staging deployment and comment '.confirm-staging' to proceed"
+
+      - name: Wait for staging confirmation
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'staging' }}
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: ${{ github.actor }}
+          minimum-approvals: 1
+          issue-title: "Manual approval required for staging deployment"
+          issue-body: |
+            Please verify the staging deployment for PR #${{ github.event.issue.number }}
+            
+            **Branch**: ${{ steps.branch-deploy.outputs.ref }}
+            **Environment**: staging
+            **Requested by**: @${{ github.actor }}
+            
+            Please check the staging environment and approve this issue to continue.
+          exclude-workflow-initiator-as-approver: false
 
       - name: Deploy (development)
         if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.environment == 'development' }}
