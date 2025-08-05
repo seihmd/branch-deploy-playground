@@ -3,7 +3,7 @@
 This repository demonstrates the usage of [github/branch-deploy](https://github.com/github/branch-deploy) action.
 
 ## How to test branch deployment
-
+<!--  -->
 1. Create a pull request
 2. In the PR comments, use these commands:
    - `.deploy` - Deploy to production environment
